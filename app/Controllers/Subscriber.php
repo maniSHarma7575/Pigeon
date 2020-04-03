@@ -1,0 +1,111 @@
+<?php
+class Subscriber extends Controller
+{
+    public function __construct($controller, $action)
+    {
+        parent::__construct($controller, $action);
+        $this->view->setLayout('dashboardLayout');
+        $this->load_model('Subscribers');
+    }
+    public function indexAction()
+    {
+        if (!Session::exists(CURRENT_USER_SESSION_NAME)) {
+            Router::redirect('');
+        }
+        $subscribers = $this->SubscribersModel->findAll(['order' => 'name']);
+        $this->view->subscribers = $subscribers;
+        $this->view->render('Subscribers/index');
+    }
+    public function addAction()
+    {
+        if (!Session::exists(CURRENT_USER_SESSION_NAME)) {
+            Router::redirect('');
+        }
+        $validation = new Validate();
+        $posted_value = ['name' => '', 'email' => '', 'category' => ''];
+        if ($_POST) {
+            $posted_value = postedValues($_POST);
+            $validation->check($_POST, [
+                'name' => [
+                    'display' => 'Name',
+                    'required' => true,
+                    'min' => 3,
+                    'max' => 25
+                ],
+                'email' => [
+                    'display' => 'Email',
+                    'required' => true,
+                    'unique' => 'subscribers',
+                    'max' => 150,
+			'validEmail'=>true
+                ],
+                'category' => [
+                    'display' => 'Category',
+                    'required' => true,
+
+                ]
+            ]);
+            if ($validation->passed()) {
+                $newUser = new Subscribers();
+                $newUser->registerNewSubscriber($_POST);
+                $status = "ok";
+                echo $status;
+                die;
+            }
+        }
+        $status = $validation->displayErrors();
+        echo $status;
+        die;
+    }
+    public function deleteAction()
+    {
+        if (!Session::exists(CURRENT_USER_SESSION_NAME)) {
+            Router::redirect('');
+        }
+        if ($_GET['email']) {
+            $email = $_GET['email'];
+            $subscriber = $this->SubscribersModel->deleteSubscriber($email);
+        }
+        Router::redirect('Dashboard/index');
+    }
+	public function editAction()
+    {
+        if (!Session::exists(CURRENT_USER_SESSION_NAME)) {
+            Router::redirect('');
+        }
+        $validation = new Validate();
+        $posted_value = ['name' => '', 'email' => '', 'category' => ''];
+        if ($_POST) {
+            $posted_value = postedValues($_POST);
+            $validation->check($_POST, [
+                'name' => [
+                    'display' => 'Name',
+                    'required' => true,
+                    'min' => 3,
+                    'max' => 25
+                ],
+                'email' => [
+                    'display' => 'Email',
+                    'required' => true,
+                    'max' => 150,
+                    'validEmail'=>true
+                ],
+                'category' => [
+                    'display' => 'Category',
+                    'required' => true,
+
+                ]
+            ]);
+            if ($validation->passed()) {
+                $newUser = new Subscribers();
+                $newUser->editSubscriber($_POST);
+                $status = "ok";
+                echo $status;
+                die;
+            }
+        }
+        $status = $validation->displayErrors();
+        echo $status;
+        die;
+    }
+}

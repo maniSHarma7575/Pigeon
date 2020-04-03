@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+
+   RewriteEngine On
+
+   RewriteCond %{REQUEST_FILENAME} !-f 
+   RewriteCond %{REQUEST_FILENAME} !-d
+   RewriteCond $1 !^(public|Config)
+   RewriteRule ^(.+)$ index.php/$1 [L]
+   ErrorDocument 403 /Home/error
+   ErrorDocument 404 /Home/error
+
+</IfModule>
+Options All -Indexes
